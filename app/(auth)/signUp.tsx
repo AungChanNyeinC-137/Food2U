@@ -1,19 +1,21 @@
 import CustomButton from '@/components/CustomButton'
 import CustomInput from '@/components/CustomInput'
-import { Link } from 'expo-router'
+import { createUser } from '@/lib/appwrite'
+import { Link, router } from 'expo-router'
 import { useState } from 'react'
 import { Alert, Text, View } from 'react-native'
 
 const signUp = () => {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [form, setForm] = useState({ name: '', email: '', password: '' })
+  const { name, email, password } = form;
+
   const submit = async () => {
-    if (!form.name || !form.email || !form.password) { Alert.alert('Error', 'Please enter valid email address & password'); return; }
+    if (!name || !email || !password) { Alert.alert('Error', 'Please enter valid email address & password'); return; }
     setIsSubmitting(true);
     try {
-      //call the appwrite sign up function
-      Alert.alert('Success', 'User signed in successfully.');
-      // router.replace('/')
+      await createUser({ name, email, password, })// no need to type twice for the same named variables eg name:name, email:email
+      router.replace('/');
     } catch (error: any) {
       Alert.alert('Error', error.message);
     } finally {
