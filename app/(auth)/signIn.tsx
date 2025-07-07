@@ -34,8 +34,7 @@ const signIn = () => {
         placeholder="Enter your password"
         value={form.password}
         onChangeText={(text) => { setForm((prev) => ({ ...prev, password: text })) }}
-        label="Email"
-        keyboardType="email-address"
+        label="password"
         secureTextEntry={true}
       />
       <CustomButton
