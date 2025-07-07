@@ -14,7 +14,7 @@ const signUp = () => {
     if (!name || !email || !password) { Alert.alert('Error', 'Please enter valid email address & password'); return; }
     setIsSubmitting(true);
     try {
-      await createUser({ name, email, password, })// no need to type twice for the same named variables eg name:name, email:email
+      await createUser({ name, email, password, })
       router.replace('/');
     } catch (error: any) {
       Alert.alert('Error', error.message);
