@@ -6,7 +6,7 @@ export const appwriteConfig = {
     projectId: process.env.EXPO_PUBLIC_APPWRITE_PROJECT_ID!,
     platform: "com.acn.food2u",
     databaseId: process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID!,
-    bucketId:'686bf8d6003217b5fc4b',
+    bucketId: '686bf8d6003217b5fc4b',
     userCollectionId: process.env.EXPO_PUBLIC_APPWRITE_USER_COLLECTION_ID!,
     categoryCollectionId: process.env.EXPO_PUBLIC_APPWRITE_CATEGORY_COLLECTION_ID!,
     menuCollectionId: process.env.EXPO_PUBLIC_APPWRITE_MENU_COLLECTION_ID!,
@@ -42,7 +42,7 @@ export const createUser = async ({ email, password, name }: CreateUserPrams) => 
                 name,
                 avatar: avatarUrl,
             });
-            
+
 
     } catch (error) {
         throw new Error(error as string);
@@ -51,8 +51,8 @@ export const createUser = async ({ email, password, name }: CreateUserPrams) => 
 
 export const SignIn = async ({ email, password }: SignInParams) => {
     try {
-        const session = await account.createEmailPasswordSession(email,password); 
-        
+        const session = await account.createEmailPasswordSession(email, password);
+
     } catch (error) {
         throw new Error(error as string)
     }
@@ -61,34 +61,50 @@ export const SignIn = async ({ email, password }: SignInParams) => {
 export const getCurrentUser = async () => {
     try {
         const currentAccount = await account.get();
-        if(!currentAccount) throw Error;
+        if (!currentAccount) throw Error;
 
         const currentUser = await databases.listDocuments(
             appwriteConfig.databaseId,
             appwriteConfig.userCollectionId,
-            [Query.equal('accountId',currentAccount.$id)]
+            [Query.equal('accountId', currentAccount.$id)]
         )
 
-        if(!currentUser) throw Error;
+        if (!currentUser) throw Error;
 
         return currentUser.documents[0];
     } catch (error) {
-        throw new Error( error as string)
+        throw new Error(error as string)
     }
 }
 
-export const getMenu = async ({category, query}:GetMenuParams) => {
- try {
-    const queries: string[] = [];
-    if(category) queries.push(Query.equal('categories',category));
-    if(query) queries.push(Query.search('name',query)); 
-    const menu = await databases.listDocuments(
-        appwriteConfig.databaseId,
-        appwriteConfig.menuCollectionId,
-        queries,
-    )
-    menu.documents;
- } catch (error) {
-    throw new Error(error as string)
- }
+export const getMenu = async ({ category, query }: GetMenuParams) => {
+    try {
+        const queries: string[] = [];
+
+        if(category) queries.push(Query.equal('categories', category));
+        if(query) queries.push(Query.search('name', query));
+
+        const menus = await databases.listDocuments(
+            appwriteConfig.databaseId,
+            appwriteConfig.menuCollectionId,
+            queries,
+        )
+
+        return menus.documents;
+    } catch (e) {
+        throw new Error(e as string);
+    }
+}
+
+export const getCategories = async () => {
+    try {
+        const categories = await databases.listDocuments(
+            appwriteConfig.databaseId,
+            appwriteConfig.categoryCollectionId,
+        )
+
+        return categories.documents;
+    } catch (e) {
+        throw new Error(e as string);
+    }
 }
