@@ -1,6 +1,8 @@
+import * as FileSystem from 'expo-file-system';
 import { ID } from "react-native-appwrite";
 import { appwriteConfig, databases, storage } from "./appwrite";
 import dummyData from "./data";
+
 
 interface Category {
     name: string;
@@ -57,7 +59,10 @@ async function clearStorage(): Promise<void> {
     );
 }
 
-async function uploadImageToStorage(imageUrl: string) {
+async function uploadImageToStorage_old(imageUrl: string) {
+
+   try {
+     console.log("✅ Seeding uploadImageToStorage starts.");
     const response = await fetch(imageUrl);
     const blob = await response.blob();
 
@@ -67,6 +72,7 @@ async function uploadImageToStorage(imageUrl: string) {
         size: blob.size,
         uri: imageUrl,
     };
+    console.log('file object:', fileObj)
 
     const file = await storage.createFile(
         appwriteConfig.bucketId,
@@ -75,15 +81,88 @@ async function uploadImageToStorage(imageUrl: string) {
     );
 
     return storage.getFileViewURL(appwriteConfig.bucketId, file.$id);
+   } catch (error) {
+    console.log(error as string)
+   }
 }
 
+function getMimeType(fileName: string): string {
+  const ext = fileName.split('.').pop()?.toLowerCase();
+  switch (ext) {
+    case 'jpg':
+    case 'jpeg':
+      return 'image/jpeg';
+    case 'png':
+      return 'image/png';
+    case 'webp':
+      return 'image/webp';
+    case 'gif':
+      return 'image/gif';
+    default:
+      return 'application/octet-stream';
+  }
+}
+
+export async function uploadImageToStorage(imageUrl: string) {
+  try {
+    console.log("✅ Seeding uploadImageToStorage starts for:", imageUrl);
+
+    // Extract file name
+    const fileName = imageUrl.split('/').pop() || `image-${Date.now()}.jpg`;
+    const mimeType = getMimeType(fileName);
+
+    // Download image to cache folder
+    const localPath = `${FileSystem.cacheDirectory}${fileName}`;
+    const downloadResult = await FileSystem.downloadAsync(imageUrl, localPath);
+
+    console.log("📥 Image downloaded to:", downloadResult.uri);
+
+    // Get file size
+    const fileInfo = await FileSystem.getInfoAsync(downloadResult.uri);
+
+    if (!fileInfo.exists || !fileInfo.size) {
+      throw new Error('Downloaded file is missing or empty.');
+    }
+
+    const fileObj = {
+      uri: downloadResult.uri,
+      name: fileName,
+      type: mimeType,
+      size: fileInfo.size,
+    };
+
+    console.log("📦 File object ready:", fileObj);
+
+    // Upload to Appwrite bucket
+    const file = await storage.createFile(
+      appwriteConfig.bucketId,
+      ID.unique(),
+      fileObj
+    );
+
+    const fileUrl = storage.getFileViewURL(appwriteConfig.bucketId, file.$id);
+    console.log("✅ Upload successful. View URL:", fileUrl);
+
+    return fileUrl;
+
+  } catch (error: any) {
+    console.error("❌ Error uploading image:", {
+      message: error?.message,
+      code: error?.code,
+      response: error?.response,
+    });
+  }
+}
 async function seed(): Promise<void> {
+    console.log("✅ Seeding start.");
+
     // 1. Clear all
     await clearAll(appwriteConfig.categoryCollectionId);
     await clearAll(appwriteConfig.customizationCollectionId);
     await clearAll(appwriteConfig.menuCollectionId);
     await clearAll(appwriteConfig.menuCustomizationCollectionId);
     await clearStorage();
+    console.log("✅ cleared db");
 
     // 2. Create Categories
     const categoryMap: Record<string, string> = {};
@@ -96,6 +175,8 @@ async function seed(): Promise<void> {
         );
         categoryMap[cat.name] = doc.$id;
     }
+    console.log("✅ Seeding Categories complete.");
+
 
     // 3. Create Customizations
     const customizationMap: Record<string, string> = {};
@@ -112,6 +193,8 @@ async function seed(): Promise<void> {
         );
         customizationMap[cus.name] = doc.$id;
     }
+    console.log("✅ Seeding Customizations complete.");
+
 
     // 4. Create Menu Items
     const menuMap: Record<string, string> = {};
