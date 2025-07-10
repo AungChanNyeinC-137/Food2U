@@ -24,7 +24,7 @@ const SearchBar = () => {
         onChangeText={handleSearch}
         placeholderTextColor='#a0a0a0'
       />
-      <TouchableOpacity className='pr-5' onPress={() => { console.log('search pressed') }}>
+      <TouchableOpacity className='pr-5' onPress={() => { router.push(`/search?query=${query}`) }}>
         <Image source={images.search} className='size-6' resizeMode='contain' tintColor='5D5F6D' />
       </TouchableOpacity>
     </View>
