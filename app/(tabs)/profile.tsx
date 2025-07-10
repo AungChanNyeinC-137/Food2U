@@ -1,10 +1,17 @@
+import { LogOut } from '@/lib/appwrite'
+import { router } from 'expo-router'
 import React from 'react'
-import { Text, View } from 'react-native'
+import { Button, View } from 'react-native'
 
 const profile = () => {
+  const logout = async () => {
+    await LogOut();
+    router.replace('/signIn');
+
+  }
   return (
     <View>
-      <Text>profile</Text>
+      <Button title='logout' onPress={() => logout} />
     </View>
   )
 }
