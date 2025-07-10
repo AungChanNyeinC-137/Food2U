@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "food2U",
-    "slug": "food2U",
+    "slug": "food2u",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -16,7 +16,8 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "package": "com.aung_chan_c_137.food2u"
     },
     "web": {
       "bundler": "metro",
@@ -37,6 +38,13 @@
     ],
     "experiments": {
       "typedRoutes": true
-    }
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "a288cfbe-44ff-410c-80c2-e022a68bb6b9"
+      }
+    },
+    "owner": "aung_chan_c_137"
   }
 }
